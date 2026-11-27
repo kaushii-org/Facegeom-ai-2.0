@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b111b">
+  <title>FACEGEOM AI | Facial Geometry Analyzer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+</head>
+<body>
+<header>
+  <div class="logo">FACEGEOM<span> AI</span></div>
+  <div class="header-tag">MATHEMATICS × ARTIFICIAL INTELLIGENCE</div>
+</header>
+
+<main>
+  <section class="intro">
+    <p class="eyebrow">COMPUTER VISION PROJECT</p>
+    <h1>Facial Geometry<br><span>Analyzer</span></h1>
+    <p class="description">Explore facial geometry, proportions and style directions through AI-assisted landmark detection and mathematical analysis.</p>
+  </section>
+
+  <section class="workspace">
+    <div class="visual-panel">
+      <div class="panel-heading"><span>VISUAL ANALYSIS</span><span id="status">SYSTEM READY</span></div>
+      <div class="camera-area">
+        <video id="video" autoplay playsinline></video>
+        <canvas id="output"></canvas>
+        <div id="placeholder">
+          <div class="camera-icon">◎</div>
+          <p>FACIAL SCAN AWAITS</p>
+          <small>Start the camera or upload a photo</small>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="startCamera">START CAMERA</button>
+        <button id="stopCamera">STOP CAMERA</button>
+        <label for="imageInput" class="upload-button">UPLOAD PHOTO</label>
+        <input type="file" id="imageInput" accept="image/*" hidden>
+        <button id="scanFace" class="scan-button" disabled>START 5-SECOND SCAN</button>
+      </div>
+      <div class="scan-feedback">
+        <div class="scan-feedback-top"><span id="scanCountdown">Start the camera to begin.</span><span id="scanPercent">0%</span></div>
+        <div class="progress-track"><div id="scanProgress"></div></div>
+      </div>
+    </div>
+
+    <div class="data-panel">
+      <div class="panel-heading"><span>MATHEMATICAL DATA</span><span>LIVE RESULTS</span></div>
+      <div class="metric"><small>FACE WIDTH</small><strong id="faceWidth">--</strong><span>Eye-distance normalized units</span></div>
+      <div class="metric"><small>FACE HEIGHT</small><strong id="faceHeight">--</strong><span>Eye-distance normalized units</span></div>
+      <div class="metric"><small>EYE DISTANCE</small><strong id="eyeDistance">--</strong><span>Normalization reference</span></div>
+      <div class="metric"><small>WIDTH / HEIGHT RATIO</small><strong id="faceRatio">--</strong><span>Geometric proportion</span></div>
+      <div class="metric"><small>JAW ANGLE</small><strong id="jawAngle">--</strong><span>Degrees</span></div>
+      <div class="metric"><small>LANDMARKS DETECTED</small><strong id="landmarks">--</strong><span>Facial reference points</span></div>
+    </div>
+  </section>
+
+  <section class="analysis-section">
+    <div class="section-heading">
+      <p class="eyebrow">ADVANCED GEOMETRIC ANALYSIS</p>
+      <h2>Facial Analysis</h2>
+      <p>Experimental measurements derived from detected facial landmarks.</p>
+    </div>
+    <div class="score-grid">
+      <div class="score-card"><small>FACIAL SYMMETRY ESTIMATE</small><div class="score-value"><strong id="symmetryScore">--</strong><span>/ 100</span></div><p id="symmetryDescription">Waiting for facial analysis.</p></div>
+      <div class="score-card"><small>GEOMETRIC HARMONY ESTIMATE</small><div class="score-value"><strong id="harmonyScore">--</strong><span>/ 100</span></div><p id="harmonyDescription">Waiting for facial analysis.</p></div>
+    </div>
+    <div class="breakdown-panel">
+      <div class="panel-heading"><span>PROPORTION BREAKDOWN</span><span>2D GEOMETRIC ESTIMATES</span></div>
+      <div class="breakdown-item"><div><strong>Facial Thirds</strong><small>Upper, middle and lower face proportions</small></div><strong id="thirdsValue">--</strong></div>
+      <div class="breakdown-item"><div><strong>Eye Spacing</strong><small>Distance between inner eye corners</small></div><strong id="eyeSpacingValue">--</strong></div>
+      <div class="breakdown-item"><div><strong>Jaw Proportion</strong><small>Jaw width relative to cheek width</small></div><strong id="jawProportionValue">--</strong></div>
+      <div class="breakdown-item"><div><strong>Midline Alignment</strong><small>Estimated left-right landmark alignment</small></div><strong id="midlineValue">--</strong></div>
+    </div>
+    <p class="analysis-note">These are experimental 2D geometric estimates, not scientifically validated attractiveness ratings. Head angle, camera distance, lighting and expression can influence results.</p>
+  </section>
+
+  <section class="math-section">
+    <p class="eyebrow">THE MATHEMATICS BEHIND THE AI</p>
+    <h2>Mathematical Foundations</h2>
+    <div class="formula-grid">
+      <div class="formula"><h3>Distance Formula</h3><p>d = √[(x₂-x₁)² + (y₂-y₁)²]</p><small>Measures distance between landmarks.</small></div>
+      <div class="formula"><h3>Geometric Ratio</h3><p>R = Width / Height</p><small>Compares facial dimensions.</small></div>
+      <div class="formula"><h3>Angle Calculation</h3><p>θ = cos⁻¹(A·B / |A||B|)</p><small>Measures angles between landmarks.</small></div>
+      <div class="formula"><h3>Coordinate Geometry</h3><p>P = (x, y)</p><small>Represents each landmark as a coordinate.</small></div>
+    </div>
+  </section>
+  <footer>FACEGEOM AI · SCHOOL MATHEMATICS EXHIBITION<br><small>AI-assisted facial landmark detection and geometric analysis</small></footer>
+</main>
+
+<!-- CLEAN RESULTS BOARD -->
+<section class="final-report" id="finalReport" aria-hidden="true">
+  <div class="report-modal" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+    <div class="report-topbar">
+      <div><p class="eyebrow">FACEGEOM AI / PERSONAL REPORT</p><p class="report-top-caption" id="reportStatus">Your scan report</p></div>
+      <button class="report-close" id="closeReport" aria-label="Close report">×</button>
+    </div>
+
+    <div class="report-tabs">
+      <button class="report-tab active" data-tab="overview">RESULTS</button>
+      <button class="report-tab" data-tab="assistant">ASK FACEGEOM AI</button>
+    </div>
+
+    <div class="report-tab-content active" id="overviewTab">
+      <div class="result-hero">
+        <div><p class="eyebrow">ESTIMATED FACIAL STRUCTURE</p><h2 id="reportTitle">Your face profile</h2><p id="faceShapeSummary">Complete a scan to generate your profile.</p></div>
+        <div class="shape-mark" aria-hidden="true"><span>FG</span></div>
+      </div>
+
+      <div class="result-primary">
+        <div><small>ESTIMATED FACE SHAPE</small><strong id="finalFaceShape">--</strong><p id="shapeDescription">Approximate classification from 2D proportions.</p></div>
+        <div class="primary-ratio"><small>WIDTH / HEIGHT</small><strong id="finalRatio">--</strong></div>
+      </div>
+
+      <div class="style-board">
+        <div class="board-heading"><span>STYLE DIRECTION</span><span>BASED ON ESTIMATED SHAPE</span></div>
+        <article class="style-row"><div class="style-index">01</div><div><small>HAIRSTYLE DIRECTION</small><h3 id="hairRecommendation">--</h3><p id="hairReason">--</p></div></article>
+        <article class="style-row"><div class="style-index">02</div><div><small>GROOMING / FACIAL HAIR</small><h3 id="groomingRecommendation">--</h3><p id="groomingReason">--</p></div></article>
+        <article class="style-row"><div class="style-index">03</div><div><small>GLASSES / ACCESSORIES</small><h3 id="glassesRecommendation">--</h3><p id="glassesReason">--</p></div></article>
+        <article class="style-row"><div class="style-index">04</div><div><small>CLOTHING COLOUR DIRECTION</small><h3 id="colourRecommendation">--</h3><p id="colourReason">--</p></div></article>
+      </div>
+
+      <div class="report-bottom-grid">
+        <div class="compact-panel"><small>GEOMETRY SNAPSHOT</small><div class="mini-stat"><span>Symmetry estimate</span><strong id="finalSymmetry">--</strong></div><div class="mini-stat"><span>Harmony estimate</span><strong id="finalHarmony">--</strong></div><div class="mini-stat"><span>Face width</span><strong id="finalWidth">--</strong></div><div class="mini-stat"><span>Face height</span><strong id="finalHeight">--</strong></div><div class="mini-stat"><span>Eye spacing</span><strong id="finalEyeSpacing">--</strong></div><div class="mini-stat"><span>Jaw proportion</span><strong id="finalJaw">--</strong></div></div>
+        <div class="compact-panel observation-panel"><small>SCAN OBSERVATION</small><p id="finalObservation">Complete a scan to view observations.</p><p class="small-note">Scores describe this scan's detected 2D landmark geometry. They are not beauty or health ratings.</p></div>
+      </div>
+
+      <div class="report-actions"><button id="rescanFace" class="scan-button report-rescan">SCAN AGAIN</button></div>
+      <p class="report-note">Style suggestions are general starting points, not rules. Face-shape estimation is approximate. Clothing colours cannot be reliably selected from a webcam scan because lighting and camera white balance alter skin tones.</p>
+    </div>
+
+    <div class="report-tab-content" id="assistantTab">
+      <div class="chat-heading"><p class="eyebrow">RESULT-BASED STYLE ASSISTANT</p><h2>Ask <span>FaceGeom AI</span></h2><p>Ask about your estimated face shape, hairstyle options, grooming, glasses or how to interpret your measurements.</p></div>
+      <div class="chat-suggestions">
+        <button class="chat-prompt">Which haircut should I try first?</button>
+        <button class="chat-prompt">Explain my face shape result.</button>
+        <button class="chat-prompt">What beard style could suit this shape?</button>
+        <button class="chat-prompt">How reliable are these measurements?</button>
+      </div>
+      <div class="chat-messages" id="chatMessages" aria-live="polite"><div class="chat-message assistant-message"><strong>FACEGEOM AI</strong><p>Your scan results will be used as context. Ask me anything about the report. The AI service must be connected by the project owner before I can generate live answers.</p></div></div>
+      <form class="chat-input-area" id="chatForm"><input id="chatInput" type="text" placeholder="Ask a question about your results..." autocomplete="off" required><button id="chatSend" type="submit">SEND</button></form>
+      <p class="chat-status" id="chatStatus">AI service not connected.</p>
+      <p class="chat-disclaimer">The assistant provides general style guidance, not medical advice. Never share sensitive personal information.</p>
+    </div>
+  </div>
+</section>
+<script src="script.js"></script>
+</body>
+</html>
