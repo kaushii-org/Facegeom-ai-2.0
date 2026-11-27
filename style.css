@@ -71,3 +71,15 @@ footer{text-align:center;padding:30px 10px;border-top:1px solid #202b3d;color:#8
 .chat-status,.chat-disclaimer{font-size:9px;color:#718198;line-height:1.6;margin-top:9px}
 @media(max-width:850px){.workspace{grid-template-columns:1fr}main{width:92%}}
 @media(max-width:600px){header{padding:0 4%}.header-tag{font-size:8px;letter-spacing:.7px}.intro{padding-top:45px}.formula-grid,.score-grid{grid-template-columns:1fr}.controls button,.upload-button{flex:1 1 auto}.report-modal{padding:16px;max-height:96vh}.final-report{padding:7px}.result-primary{padding:15px;align-items:flex-start}.result-primary>div:first-child strong{font-size:22px}.primary-ratio{padding-left:13px}.report-bottom-grid{grid-template-columns:1fr}.shape-mark{width:50px;height:50px;flex-basis:50px}.board-heading span:last-child{font-size:7px}.chat-messages{min-height:190px;max-height:290px}.chat-input-area input{padding:11px}.chat-input-area button{padding:0 12px}}
+
+
+/* Added skin intelligence panel; existing report styling remains unchanged. */
+.skin-panel{margin-top:15px;padding:18px 20px;background:#0f1928;border:1px solid var(--line);border-radius:9px}
+.skin-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:15px}
+.skin-stat{padding:13px;background:#111e2e;border:1px solid #2b4058;border-radius:7px;min-width:0}
+.skin-stat small,.palette-wrap>small{display:block;color:#8ea0b6;font-size:9px;letter-spacing:1.2px;font-weight:700;margin-bottom:9px}
+.skin-stat strong{display:block;color:var(--cyan);font-size:16px;margin-bottom:6px}
+.skin-stat p{color:var(--muted);font-size:10px;line-height:1.5}
+.palette-wrap{margin-top:16px}.skin-palette{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}.skin-swatch{display:block;width:42px;height:32px;border-radius:5px;border:1px solid #ffffff35}
+.skin-disclaimer{font-size:9px;color:#8493aa;line-height:1.65;margin-top:14px}
+@media(max-width:600px){.skin-grid{grid-template-columns:1fr}.skin-swatch{width:36px;height:28px}}

@@ -33,7 +33,7 @@ app.get("/health", (_req, res) => {
 });
 
 const SYSTEM_PROMPT = `You are FACEGEOM AI, a concise, practical assistant built into a facial geometry and personal styling project.
-Use the supplied scan context when relevant. Explain measurements in plain language and give useful, realistic hairstyle, grooming, glasses and clothing advice.
+Use the supplied scan context when relevant. Explain measurements in plain language and give useful, realistic hairstyle, grooming, glasses and clothing advice. You may explain supplied experimental skin pixel estimates, but never diagnose skin conditions or claim to identify acne, pores, hydration, or disease.
 Be honest that face-shape classification is a rough heuristic and the scan uses 2D image landmarks. Symmetry and harmony values are experimental geometry estimates, not attractiveness scores or scientifically validated ratings. Camera lighting cannot reliably determine skin undertone.
 Never rate a person's attractiveness, make medical claims, or present the scan as a 3D measurement. If no scan context is available, answer general styling questions without pretending a scan exists. Keep replies focused and easy to understand.`;
 
@@ -46,7 +46,8 @@ function cleanContext(input) {
   const allowed = [
     "faceShape", "symmetry", "harmony", "faceRatio", "faceWidth",
     "faceHeight", "eyeSpacing", "jawProportion", "hairstyle",
-    "grooming", "glasses", "clothingColours", "observations"
+    "grooming", "glasses", "clothingColours", "observations",
+    "skinTone", "skinUndertone", "skinTexture"
   ];
   const output = {};
   for (const key of allowed) {

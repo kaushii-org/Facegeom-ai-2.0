@@ -128,8 +128,19 @@
         <div class="compact-panel observation-panel"><small>SCAN OBSERVATION</small><p id="finalObservation">Complete a scan to view observations.</p><p class="small-note">Scores describe this scan's detected 2D landmark geometry. They are not beauty or health ratings.</p></div>
       </div>
 
+      <section class="skin-panel" aria-labelledby="skinHeading">
+        <div class="board-heading"><span id="skinHeading">SKIN INTELLIGENCE</span><span>IMAGE-BASED ESTIMATES</span></div>
+        <div class="skin-grid">
+          <div class="skin-stat"><small>OBSERVED SKIN TONE</small><strong id="skinTone">--</strong><p id="skinToneNote">Estimated from cheek pixels.</p></div>
+          <div class="skin-stat"><small>TENTATIVE UNDERTONE</small><strong id="skinUndertone">--</strong><p id="skinUndertoneNote">Lighting can change this estimate.</p></div>
+          <div class="skin-stat"><small>VISIBLE TEXTURE PROXY</small><strong id="skinTexture">--</strong><p id="skinTextureNote">A simple image-texture measure, not a skin diagnosis.</p></div>
+        </div>
+        <div class="palette-wrap"><small>STARTING COLOUR PALETTE</small><div id="skinPalette" class="skin-palette"><span>Palette appears after a scan.</span></div></div>
+        <p class="skin-disclaimer">Skin results are experimental visual estimates, not medical assessments. Use even natural daylight, avoid filters, and treat undertone and texture results as approximate. This tool does not diagnose acne, pores, dryness or any skin condition.</p>
+      </section>
+
       <div class="report-actions"><button id="rescanFace" class="scan-button report-rescan">SCAN AGAIN</button></div>
-      <p class="report-note">Style suggestions are general starting points, not rules. Face-shape estimation is approximate. Clothing colours cannot be reliably selected from a webcam scan because lighting and camera white balance alter skin tones.</p>
+      <p class="report-note">Style suggestions are general starting points, not rules. Face-shape estimation is approximate. Skin tone, undertone and palette are experimental pixel estimates; lighting and camera white balance can change them.</p>
     </div>
 
     <div class="report-tab-content" id="assistantTab">
@@ -139,6 +150,7 @@
         <button class="chat-prompt">Explain my face shape result.</button>
         <button class="chat-prompt">What beard style could suit this shape?</button>
         <button class="chat-prompt">How reliable are these measurements?</button>
+      <button class="chat-prompt">Explain my skin analysis estimates.</button>
       </div>
       <div class="chat-messages" id="chatMessages" aria-live="polite"><div class="chat-message assistant-message"><strong>FACEGEOM AI</strong><p>Your scan results will be used as context. Ask me anything about the report. The AI service must be connected by the project owner before I can generate live answers.</p></div></div>
       <form class="chat-input-area" id="chatForm"><input id="chatInput" type="text" placeholder="Ask a question about your results..." autocomplete="off" required><button id="chatSend" type="submit">SEND</button></form>

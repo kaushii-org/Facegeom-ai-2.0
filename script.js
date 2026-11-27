@@ -20,6 +20,8 @@ let cameraRunning = false;
 let processing = false;
 let currentMode = "idle";
 let photoObjectUrl = null;
+let photoImage = null;
+let latestSkinResult = null;
 let scanActive = false;
 let scanFrames = [];
 let scanStartTime = 0;
@@ -317,6 +319,7 @@ async function analyzePhoto(file) {
     const image=new Image();
 
     image.onload=async()=>{
+      photoImage=image;
       currentMode="photo";
       processing=true;
 
@@ -428,6 +431,97 @@ function averageLandmarks(frames) {
   return output;
 }
 
+function sampleSkinIntelligence(points) {
+  const source = currentMode === "photo" ? photoImage : video;
+  if (!source || !source.videoWidth && !source.naturalWidth) return null;
+  const width = source.videoWidth || source.naturalWidth;
+  const height = source.videoHeight || source.naturalHeight;
+  if (!width || !height || !points || points.length < 455) return null;
+
+  const probe = document.createElement("canvas");
+  const pctx = probe.getContext("2d", { willReadFrequently: true });
+  probe.width = width; probe.height = height;
+  pctx.drawImage(source, 0, 0, width, height);
+
+  // Cheek landmarks are sampled in small patches; forehead, eyes and lips are avoided.
+  const cheekPoints = [points[123], points[352]];
+  const patchRadius = Math.max(5, Math.round(width * 0.012));
+  const samples = [];
+  const grayValues = [];
+  const patchCanvases = [];
+
+  for (const point of cheekPoints) {
+    const cx = clamp(Math.round(point.x * width), patchRadius, width - patchRadius - 1);
+    const cy = clamp(Math.round(point.y * height), patchRadius, height - patchRadius - 1);
+    const size = patchRadius * 2 + 1;
+    const data = pctx.getImageData(cx - patchRadius, cy - patchRadius, size, size).data;
+    const patch = [];
+    for (let i = 0; i < data.length; i += 4) {
+      const r=data[i], g=data[i+1], b=data[i+2];
+      const max=Math.max(r,g,b), min=Math.min(r,g,b), brightness=(r+g+b)/3;
+      if (brightness < 35 || brightness > 245 || max-min > 95) continue;
+      samples.push([r,g,b]);
+      const gray=0.299*r+0.587*g+0.114*b;
+      grayValues.push(gray); patch.push(gray);
+    }
+    patchCanvases.push(patch);
+  }
+  if (samples.length < 20) return null;
+
+  const rgb=[0,1,2].map(i=>average(samples.map(px=>px[i])));
+  const luminance=0.2126*rgb[0]+0.7152*rgb[1]+0.0722*rgb[2];
+  const spread=Math.sqrt(average(grayValues.map(v=>(v-average(grayValues))**2)));
+  const redGreen=rgb[0]-rgb[1], yellowBlue=rgb[1]-rgb[2];
+  let undertone="Neutral-leaning";
+  if (yellowBlue > 10 && redGreen > 3) undertone="Warm-leaning";
+  else if (yellowBlue < 3 && redGreen < 8) undertone="Cool-leaning";
+
+  let tone="Medium";
+  if(luminance<75) tone="Deep";
+  else if(luminance<110) tone="Medium-deep";
+  else if(luminance<150) tone="Medium";
+  else if(luminance<190) tone="Light-medium";
+  else tone="Light";
+
+  // Local pixel variation is only a coarse texture proxy and is strongly affected by light/noise.
+  const texture=spread<13?"Low variation":spread<24?"Moderate variation":"Higher variation";
+  let palette;
+  if(undertone.startsWith("Warm")) palette=["#B56A45","#D6A66D","#6F7045","#9B6B35","#F0D8B5","#713F32"];
+  else if(undertone.startsWith("Cool")) palette=["#344C70","#7186A6","#8C657C","#496B69","#D7DCE5","#343A52"];
+  else palette=["#526B61","#8C735B","#52647B","#A47769","#D6C9B6","#41464D"];
+
+  return { tone, undertone, texture, palette, luminance:Math.round(luminance), sampleCount:samples.length };
+}
+
+function renderSkinIntelligence(result) {
+  if (!result) {
+    setMetric("skinTone","Not available");
+    setMetric("skinUndertone","Not available");
+    setMetric("skinTexture","Not available");
+    setMetric("skinToneNote","Cheek pixels could not be sampled clearly. Try even daylight.");
+    setMetric("skinUndertoneNote","No reliable estimate from this scan.");
+    setMetric("skinTextureNote","Try a sharp, unfiltered image with even lighting.");
+    if($("skinPalette")) $("skinPalette").textContent="No palette estimate available.";
+    return;
+  }
+  setMetric("skinTone",result.tone);
+  setMetric("skinUndertone",result.undertone);
+  setMetric("skinTexture",result.texture);
+  setMetric("skinToneNote","Approximate cheek-pixel brightness: "+result.luminance+" / 255.");
+  setMetric("skinUndertoneNote","Tentative RGB colour-balance estimate; lighting may change it.");
+  setMetric("skinTextureNote","Pixel variation proxy only; not a measure of pores or a diagnosis.");
+  const holder=$("skinPalette");
+  if(holder) {
+    holder.innerHTML="";
+    result.palette.forEach(color=>{
+      const swatch=document.createElement("span");
+      swatch.className="skin-swatch"; swatch.style.backgroundColor=color;
+      swatch.title=color; swatch.setAttribute("aria-label","Palette colour "+color);
+      holder.appendChild(swatch);
+    });
+  }
+}
+
 function finishFinalScan() {
   scanActive=false;
 
@@ -474,7 +568,9 @@ function finishFinalScan() {
   }
 
   latestResult=result;
+  latestSkinResult=sampleSkinIntelligence(points);
   showFinalReport(result,count);
+  renderSkinIntelligence(latestSkinResult);
 
   setStatus("ANALYSIS COMPLETE");
   setScanFeedback("Scan complete. "+count+" stable frames analysed.",100);
@@ -710,6 +806,9 @@ function getChatScanContext() {
     grooming:$("groomingRecommendation").textContent,
     glasses:$("glassesRecommendation").textContent,
     clothingColours:$("colourRecommendation").textContent,
+    skinTone:$("skinTone").textContent,
+    skinUndertone:$("skinUndertone").textContent,
+    skinTexture:$("skinTexture").textContent,
     observations:$("finalObservation").textContent
   };
 }
@@ -749,7 +848,7 @@ async function sendChatMessage(message) {
         message,
         context:getChatScanContext(),
         history:chatHistory.slice(-10),
-        systemInstruction:"You are FACEGEOM AI, a concise and practical style advisor. Use the supplied scan context to explain estimated face shape and suggest hairstyles, grooming, glasses and clothing colours. Be clear that the face-shape heuristic is approximate, 2D scan scores are not attractiveness ratings, and webcam lighting cannot determine skin undertone reliably. Do not make medical claims or rate attractiveness. Ask a clarifying question only when needed."
+        systemInstruction:"You are FACEGEOM AI, a concise and practical style advisor. Use the supplied scan context to explain estimated face shape, skin pixel estimates, and suggest hairstyles, grooming, glasses and clothing colours. Be clear that face-shape and skin estimates are approximate, 2D scan scores are not attractiveness ratings, and lighting affects skin colour. Do not make medical claims, diagnose skin conditions, or rate attractiveness. Ask a clarifying question only when needed."
       })
     });
 
